@@ -20,14 +20,14 @@
 
         - name: Fetch antora.yml from the showroom content dir
           ansible.builtin.slurp:
-            src: "{{ showroom_user_content_dir }}/content/antora.yml"
+            src: "{{ showroom_user_content_dir }}/{{ (condition_var) | ternary('', 'content/') }}antora.yml"
           register: r_slurp_antora_yml
 
         - name: Write merged_vars to a file
           ansible.builtin.copy:
             content: >-
               {{ __src | combine(__attribute_user_data, recursive=true) | to_nice_yaml(indent=2) }}
-            dest: "{{ showroom_user_content_dir }}/content/antora.yml"
+            dest: "{{ showroom_user_content_dir }}/{{ (condition_var) | ternary('', 'content/') }}antora.yml"
           vars:
             __attribute_user_data:
               asciidoc:
