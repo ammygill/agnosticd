@@ -18,24 +18,16 @@
           set_fact:
             f_user_data: "{{ lookup('agnosticd_user_data', '*') | from_yaml }}"
 
-        - name: Set the antora file path based on existence
-          set_fact:
-            antora_src_path: "{{ lookup('first_found', paths_to_check) }}"
-          vars:
-          paths_to_check:
-            - "{{ showroom_user_content_dir }}/antora.yml"
-            - "{{ showroom_user_content_dir }}/content/antora.yml"
-
         - name: Fetch antora.yml from the showroom content dir
           ansible.builtin.slurp:
-            src: "{{ antora_src_path }}"
+            src: "{{ showroom_user_content_dir }}/{{ 'antora.yml' if (condition_var | default(false)) else 'content/antora.yml' }}"
           register: r_slurp_antora_yml
 
         - name: Write merged_vars to a file
           ansible.builtin.copy:
             content: >-
               {{ __src | combine(__attribute_user_data, recursive=true) | to_nice_yaml(indent=2) }}
-            dest: "{{ antora_src_path }}"
+            dest: "{{ showroom_user_content_dir }}/{{ 'antora.yml' if (condition_var | default(false)) else 'content/antora.yml' }}"
           vars:
             __attribute_user_data:
               asciidoc:
